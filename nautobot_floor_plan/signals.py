@@ -3,7 +3,7 @@
 from django.apps import apps as global_apps
 from django.conf import settings
 
-PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_floor_plan"]
+PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_floor_plan"]  # type: ignore
 
 
 def post_migrate_create__add_statuses(sender, *, apps=global_apps, **kwargs):

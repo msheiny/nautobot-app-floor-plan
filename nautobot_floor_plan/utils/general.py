@@ -136,4 +136,4 @@ def validate_not_zero(value):
         )
 
 
-validate_not_zero.message = "Must be a positive or negative Integer not equal to zero."
+validate_not_zero.message = "Must be a positive or negative Integer not equal to zero."  # type: ignore

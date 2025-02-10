@@ -884,6 +884,8 @@ def tests(context, failfast=False, keepdb=False, lint_only=False):
         print("Running unit tests...")
         unittest(context, failfast=failfast, keepdb=keepdb)
         unittest_coverage(context)
+    print("Running Mypy...")
+    mypy(context)
     print("All tests have passed!")
 
 
@@ -917,3 +919,14 @@ def validate_app_config(context):
         file="development/app_config_schema.py",
         env={"APP_CONFIG_SCHEMA_COMMAND": "validate"},
     )
+
+
+@task
+def mypy(context, show_traceback=False, pdb=False):
+    """Check for typing errors."""
+    command = "mypy"
+    if show_traceback:
+        command += " --show-traceback"
+    if pdb:
+        command += " --pdb"
+    run_command(context, command)
