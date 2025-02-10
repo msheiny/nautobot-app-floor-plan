@@ -3,12 +3,15 @@
 import os
 import sys
 
+import django_stubs_ext
 from nautobot.core.settings import *  # noqa: F403  # pylint: disable=wildcard-import,unused-wildcard-import
 from nautobot.core.settings_funcs import is_truthy
 
 #
 # Debug
 #
+
+django_stubs_ext.monkeypatch()
 
 DEBUG = is_truthy(os.getenv("NAUTOBOT_DEBUG", "false"))
 _TESTING = len(sys.argv) > 1 and sys.argv[1] == "test"

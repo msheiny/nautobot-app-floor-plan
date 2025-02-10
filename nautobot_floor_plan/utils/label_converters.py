@@ -654,7 +654,7 @@ class AlphanumericConverter(LabelConverter):
 
         if self._increment_prefix:
             prefix = self._generate_prefix(number)
-            return f"{prefix}{self._number if self._use_leading_zeros else int(self._number)}"
+            return f"{prefix}{self._number if self._use_leading_zeros else int(self._number)}"  # type: ignore
 
         return f"{self._prefix}{number:02d}" if self._use_leading_zeros else f"{self._prefix}{number}"
 

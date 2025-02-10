@@ -5,6 +5,7 @@
 """Forms for nautobot_floor_plan."""
 
 import json
+from typing import Any, Dict, cast
 
 from django import forms
 from django.forms import formset_factory
@@ -108,6 +109,7 @@ class FloorPlanForm(NautobotModelForm):
     def __init__(self, *args, **kwargs):
         """Overwrite the constructor to set initial values and handle custom ranges."""
         super().__init__(*args, **kwargs)
+        self.initial = cast(Dict[str, Any], self.initial)
 
         # Initialize axis configuration
         self.axis_letters = {"x": False, "y": False}
@@ -458,7 +460,7 @@ class FloorPlanTileForm(NautobotModelForm):
 
     def _clean_custom_origin(self, field_name, axis):
         """Clean method for custom label origins."""
-        fp_obj = self.cleaned_data.get("floor_plan")
+        fp_obj = cast(models.FloorPlan, self.cleaned_data.get("floor_plan"))
         value = self.cleaned_data.get(field_name)
 
         try:
@@ -468,7 +470,7 @@ class FloorPlanTileForm(NautobotModelForm):
 
             # Validate against floor plan size
             max_size = fp_obj.x_size if axis == "X" else fp_obj.y_size
-            if position > max_size:
+            if position > max_size:  # type: ignore
                 raise forms.ValidationError(
                     f"Position {value} (absolute: {position}) exceeds floor plan {axis} size of {max_size}"
                 )
@@ -480,14 +482,14 @@ class FloorPlanTileForm(NautobotModelForm):
 
     def clean_x_origin(self):
         """Clean method for x_origin field."""
-        fp_obj = self.cleaned_data.get("floor_plan")
+        fp_obj: models.FloorPlan = self.cleaned_data["floor_plan"]
         if fp_obj.custom_labels.filter(axis="X").exists():
             return self._clean_custom_origin("x_origin", "X")
         return self._clean_origin("x_origin", "X")
 
     def clean_y_origin(self):
         """Clean method for y_origin field."""
-        fp_obj = self.cleaned_data.get("floor_plan")
+        fp_obj: models.FloorPlan = self.cleaned_data["floor_plan"]
         if fp_obj.custom_labels.filter(axis="Y").exists():
             return self._clean_custom_origin("y_origin", "Y")
         return self._clean_origin("y_origin", "Y")
@@ -495,6 +497,7 @@ class FloorPlanTileForm(NautobotModelForm):
     def __init__(self, *args, **kwargs):
         """Initialize the form and handle custom label conversions."""
         super().__init__(*args, **kwargs)
+        self.initial = cast(Dict[str, Any], self.initial)
         self.axis_letters = {"x": False, "y": False}
 
         if fp_id := self.initial.get("floor_plan") or self.data.get("floor_plan"):
@@ -554,7 +557,7 @@ class FloorPlanTileForm(NautobotModelForm):
         if not fp_id:
             return 0
 
-        fp_obj = self.fields["floor_plan"].queryset.get(id=fp_id)
+        fp_obj: FloorPlanForm = self.fields["floor_plan"].queryset.get(id=fp_id)  # type: ignore
         value = self.cleaned_data.get(field_name)
 
         # Determine if letters are being used for x or y axis labels

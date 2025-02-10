@@ -1,6 +1,7 @@
 """Models for Nautobot Floor Plan."""
 
 import logging
+from typing import TYPE_CHECKING, Union
 
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
@@ -21,6 +22,10 @@ from nautobot_floor_plan.utils.custom_validators import ValidateNotZero
 from nautobot_floor_plan.utils.label_generator import FloorPlanLabelGenerator
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    # This doesn't really exists on django so it always need to be imported this way
+    from django.db.models.manager import RelatedManager
 
 
 @extras_features(
@@ -88,6 +93,10 @@ class FloorPlan(PrimaryModel):
         help_text="Positive or negative integer that will be used to step labeling.",
     )
     is_tile_movable = models.BooleanField(default=True, help_text="Determines if Tiles can be moved once placed")
+
+    if TYPE_CHECKING:
+        custom_labels: models.QuerySet["FloorPlanCustomAxisLabel"]
+        tiles: "RelatedManager[FloorPlanTile]"
 
     class Meta:
         """Metaclass attributes."""
@@ -272,7 +281,7 @@ class FloorPlanCustomAxisLabel(models.Model):
         """Add validation to ensure seed values are reset."""
         super().clean()
         # If this is a new custom label (no pk) or the axis has changed
-        if not self.pk or (self.pk and self._state.fields_cache.get("axis") != self.axis):
+        if not self.pk or (self.pk and self._state.fields_cache.get("axis") != self.axis):  # type: ignore
             if self.axis == "X" and self.floor_plan.x_origin_seed != 1:
                 self.floor_plan.x_origin_seed = 1
             elif self.axis == "Y" and self.floor_plan.y_origin_seed != 1:
@@ -292,7 +301,7 @@ class FloorPlanCustomAxisLabel(models.Model):
 class FloorPlanTile(PrimaryModel):
     """Model representing a single rectangular "tile" within a FloorPlan, its status, and any Rack that it contains."""
 
-    status = StatusField(blank=False, null=False)
+    status = StatusField(blank=False, null=False)  # type: ignore
     floor_plan = models.ForeignKey(to=FloorPlan, on_delete=models.CASCADE, related_name="tiles")
     # TODO: for efficiency we could consider using something like GeoDjango, rather than inventing geometry from
     # first principles, but since that requires changing settings.DATABASES and installing libraries, avoid it for now.
@@ -399,7 +408,7 @@ class FloorPlanTile(PrimaryModel):
         FloorPlanTile.allocation_type_assignment(self)
         FloorPlanTile.validate_tile_placement(self)
 
-        def group_tile_bounds(rack, rack_group):
+        def group_tile_bounds(rack: Union[FloorPlanTile, None], rack_group):
             """Validate the overlapping of group tiles."""
             if rack is not None:
                 # Set the tile rack_group equal to the rack.rack_group if the rack is in a rack_group
@@ -408,11 +417,11 @@ class FloorPlanTile(PrimaryModel):
                     self.rack_group = rack.rack_group
                 if x_max > ox_max or x_min < ox_min:
                     raise ValidationError(
-                        {f"Rack {self.rack} must not extend beyond the boundary of the defined group tiles"}
+                        {f"Rack {self.rack} must not extend beyond the boundary of the defined group tiles"}  # type: ignore
                     )
                 if y_max > oy_max or y_min < oy_min:
                     raise ValidationError(
-                        {f"Rack {self.rack} must not extend beyond the boundary of the defined group tiles"}
+                        {f"Rack {self.rack} must not extend beyond the boundary of the defined group tiles"}  # type: ignore
                     )
                 self.on_group_tile = True
                 if orack_group is not None:

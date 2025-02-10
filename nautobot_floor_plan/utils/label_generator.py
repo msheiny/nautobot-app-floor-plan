@@ -159,7 +159,7 @@ class FloorPlanLabelGenerator:
 
             # Increment or decrement letters based on step direction
             if step > 0:
-                start_letters = self._increment_letters(start_letters, increment_letter, len(start_letters))
+                start_letters = self._increment_letters(start_letters, increment_letter, len(start_letters))  # type: ignore
             else:
                 start_letters = self._decrement_letters(start_letters, increment_letter, end_letters)
 

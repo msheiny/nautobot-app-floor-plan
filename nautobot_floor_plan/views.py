@@ -51,13 +51,13 @@ class LocationFloorPlanTab(ObjectView):
 class ChildLocationFloorPlanTab(ObjectView):
     """Add a "Child Floor Plan" tab to the Location detail view."""
 
-    queryset = Location.objects.without_tree_fields().all()
+    queryset = Location.objects.without_tree_fields().all()  # type: ignore
     template_name = "nautobot_floor_plan/location_child_floor_plan.html"
 
     def get_extra_context(self, request, instance):
         """Return child locations that have floor plans."""
         children = (
-            Location.objects.restrict(request.user, "view")
+            Location.objects.restrict(request.user, "view")  # type: ignore
             .without_tree_fields()
             .filter(parent=instance, floor_plan__isnull=False)
             .select_related("parent", "location_type")
@@ -69,7 +69,7 @@ class ChildLocationFloorPlanTab(ObjectView):
             "paginator_class": EnhancedPaginator,
             "per_page": get_paginate_count(request),
         }
-        RequestConfig(request, paginate).configure(children_table)
+        RequestConfig(request, paginate).configure(children_table)  # type: ignore
 
         return {
             "children_table": children_table,
